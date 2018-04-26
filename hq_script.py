@@ -13,9 +13,10 @@ from PIL import Image
 import time
 
 pytesseract.pytesseract.tesseract_cmd = "C:\\Users\\Austin\\Tesseract-OCR\\tesseract.exe"
+    
 
 def search_web(query):
-    return search(query, tld="co.in", num=2, stop=1, pause=1)
+    return search(query, tld="co.in", num=2, stop=1, pause=0)
 
 def grab_text(url_list):
 
@@ -29,7 +30,7 @@ def grab_text(url_list):
     
 
 def grab_image():
-    question_interface = numpy.array(PIL.ImageGrab.grab(bbox=(343,402,677,725))) #650,218,946,500
+    question_interface = numpy.array(PIL.ImageGrab.grab(bbox=(343,367,682,682))) #650,218,946,500
     question_interface = cv2.cvtColor(question_interface,cv2.COLOR_BGR2RGB)
     question_interface = cv2.resize(question_interface, (0,0),fx=2,fy=2) #3,3
     ret,question_interface = cv2.threshold(question_interface,127,255,cv2.THRESH_BINARY)
@@ -39,11 +40,15 @@ def grab_image():
 def break_ans_ques(text):
     first_break = text.find("\n\n")
     question = text[0:first_break+1]
-    print("this is the question: " + question)
     text = text[first_break+2:].replace("\n\n","\n")
-    print("these are the answers : " + text)
-    ans_1,ans_2,ans_3 = text.split("\n")
-    all_text = [question,ans_1,ans_2,ans_3]
+    ans = text.split("\n")
+    if len(ans) > 3 :
+        question = question + " " + ans[0]
+        all_text = [question,ans[1],ans[2],ans[3]]
+    else:
+        all_text = [question,ans[0],ans[1],ans[2]]
+    print("this is the question: " + question)
+    print("these are the answers : " + ans[0] + ans[1] + ans[2])
     return all_text
 
 def result_analysis_1(answers):
@@ -71,6 +76,7 @@ if __name__ == '__main__':
     print("start of program")
     print_time()
     all_text = grab_image()
+    print(all_text)
     print("after grab image: "),
     print_time()
     all_text = break_ans_ques(all_text)
@@ -78,6 +84,8 @@ if __name__ == '__main__':
     print_time()
     query = all_text[0]
     url_list = list(search_web(query))
+    for link in url_list:
+        print(link)
     print("after search_web: "),
     print_time()
     sample_ans_1 = all_text[1]
