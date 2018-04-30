@@ -35,26 +35,22 @@ def grab_text(url_list):
     #return image
 
 def grab_image():
-    question_interface = numpy.array(PIL.ImageGrab.grab(bbox=(23,215,402,582))) #25,185,420,570
+    #question
+    question_interface = numpy.array(PIL.ImageGrab.grab(bbox=(23,215,402,360))) #23,215,402,359
     question_interface = cv2.cvtColor(question_interface,cv2.COLOR_BGR2RGB)
     question_interface = cv2.resize(question_interface, (0,0),fx=2,fy=2) #3,3
     ret,question_interface = cv2.threshold(question_interface,127,255,cv2.THRESH_BINARY)
-    return pytesseract.image_to_string(question_interface)
-
-def break_ans_ques(text):
-    first_break = text.find("\n\n")
-    question = text[0:first_break+1]
-    text = text[first_break+2:].replace("\n\n","\n")
-    print(text)
-    ans = text.split("\n")
-    if len(ans) > 3 :
-        question = question + " " + ans[0]
-        all_text = [question,ans[1],ans[2],ans[3]]
-    else:
-        all_text = [question,ans[0],ans[1],ans[2]]
-    print("this is the question: " + question)
-    print("these are the answers : " + ans[0] + ans[1] + ans[2])
+    question = pytesseract.image_to_string(question_interface)
+    #answer 1
+    ans_1_interface = numpy.array(PIL.ImageGrab.grab(bbox=(23,361,402,580))) #23,315,402,439
+    ans_1_interface = cv2.cvtColor(ans_1_interface,cv2.COLOR_BGR2RGB)
+    ans_1_interface = cv2.resize(ans_1_interface, (0,0),fx=3,fy=3) #3,3
+    ret,ans_1_interface = cv2.threshold(ans_1_interface,127,255,cv2.THRESH_BINARY)
+    answers = pytesseract.image_to_string(ans_1_interface)
+    
+    all_text = [question,answers]
     return all_text
+
 
 def result_analysis_1(answers):
     sum = 0
@@ -80,12 +76,12 @@ def print_time():
 if __name__ == '__main__':
     print("start of program")
     print_time()
-    #image = screenshot()
-    #all_text = pytesseract.image_to_string(image)
+    
     all_text = grab_image()
+    answers = all_text[1].split("\n\n")
     print("after grab image: "),
     print_time()
-    all_text = break_ans_ques(all_text)
+    
     print("after break_ans_ques: "),
     print_time()
     query = all_text[0]
@@ -97,9 +93,9 @@ if __name__ == '__main__':
         print(link)
     print("after search_web: "),
     print_time()
-    sample_ans_1 = all_text[1].replace(".","")
-    sample_ans_2 = all_text[2].replace(".","")
-    sample_ans_3 = all_text[3].replace(".","")
+    answers[0] = answers[0].replace(".","")
+    answers[1] = answers[1].replace(".","")
+    answers[2] = answers[2].replace(".","")
     page_html = (grab_text(url_list).read())
     print("after reading url: "),
     print_time()
@@ -109,11 +105,8 @@ if __name__ == '__main__':
     html_fixed = (soup.prettify())
     print("after html cleaning up: "),
     print_time()
-    answers = [sample_ans_1,sample_ans_2,sample_ans_3]
 
     print("\n\n\n")
 
     result_analysis_1(answers)
-    #print("after analysis: "),
-    #print_time()
     
