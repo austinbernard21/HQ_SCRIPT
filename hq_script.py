@@ -38,40 +38,75 @@ def grab_image():
     #question
     question_interface = numpy.array(PIL.ImageGrab.grab(bbox=(23,215,402,360))) #23,215,402,359
     question_interface = cv2.cvtColor(question_interface,cv2.COLOR_BGR2RGB)
-    question_interface = cv2.resize(question_interface, (0,0),fx=2,fy=2) #3,3
+    question_interface = cv2.resize(question_interface, (0,0),fx=3,fy=3) #3,3
     ret,question_interface = cv2.threshold(question_interface,127,255,cv2.THRESH_BINARY)
     question = pytesseract.image_to_string(question_interface)
-    #answer 1
+    #answers
     ans_1_interface = numpy.array(PIL.ImageGrab.grab(bbox=(23,361,402,580))) #23,315,402,439
     ans_1_interface = cv2.cvtColor(ans_1_interface,cv2.COLOR_BGR2RGB)
-    ans_1_interface = cv2.resize(ans_1_interface, (0,0),fx=3,fy=3) #3,3
+    ans_1_interface = cv2.resize(ans_1_interface, (0,0),fx=2,fy=2) #3,3
     ret,ans_1_interface = cv2.threshold(ans_1_interface,127,255,cv2.THRESH_BINARY)
     answers = pytesseract.image_to_string(ans_1_interface)
+
     
     all_text = [question,answers]
     return all_text
 
 
-def result_analysis_1(answers):
+def result_analysis_1(answers,html_fixed):
     sum = 0
     results = [html_fixed.count(answers[0]),html_fixed.count(answers[1]),html_fixed.count(answers[2])]
     
     for result in results:
         sum = sum + result
 
-    print(answers[0], end="")    
-    print(' : {0:.2f}'.format((results[0]/sum)))
-    print(answers[1], end="")    
-    print(' : {0:.2f}'.format((results[1]/sum)))
-    print(answers[2], end="")    
-    print(' : {0:.2f}'.format((results[2]/sum)))
+    return results
 
-#def result_analysis_2(answers):
+def result_analysis_2(answers,html_fixed):
+    ans_1 = answers[0]
+    ans_2 = answers[1]
+    ans_3 = answers[2]
+
+    ans_1_searches = ans_1.split()
+    ans_2_searches = ans_2.split()
+    ans_3_searches = ans_3.split()
+
+
+    ans_1_sum = 0
+    ans_2_sum = 0
+    ans_3_sum = 0
+
+    for word in ans_1_searches:
+        count = 0
+        count = html_fixed.count(word)
+        ans_1_sum = ans_1_sum = count
+
+    for word in ans_2_searches:
+        count = 0
+        count = html_fixed.count(word)
+        ans_2_sum = ans_2_sum = count
+
+
+    for word in ans_3_searches:
+        count = 0
+        count = html_fixed.count(word)
+        ans_3_sum = ans_3_sum = count
+    
+    results = [ans_1_sum,ans_2_sum,ans_3_sum]
+    return results
+
 
 def print_time():
     millis = int(round(time.time()*1000))
     print(millis)
 
+def print_results(answers, results):
+    print(answers[0], end="")    
+    print(" : " + str(results[0]))
+    print(answers[1], end="")    
+    print(" : " + str(results[1]))
+    print(answers[2], end="")    
+    print(" : " + str(results[2]))
 
 if __name__ == '__main__':
     print("start of program")
@@ -107,6 +142,16 @@ if __name__ == '__main__':
     print_time()
 
     print("\n\n\n")
+    print(query)
 
-    result_analysis_1(answers)
+    results = result_analysis_1(answers,html_fixed)
+    sum_check = 0
+    for result in results:
+        sum_check = sum_check + result
+
+    if(sum_check==0):
+        results = result_analysis_2(answers,html_fixed)
+
+    print_results(answers,results)
+
     
